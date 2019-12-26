@@ -1,6 +1,6 @@
 import sys  # sys нужен для передачи argv в QApplication
 from PyQt5 import QtWidgets
-from design import Ui_MainWindow
+from py_windows.design import Ui_MainWindow
 
 
 class ExampleApp(QtWidgets.QMainWindow):
@@ -18,14 +18,11 @@ class ExampleApp(QtWidgets.QMainWindow):
         self.ui.label.setText("Button was pushed!")
 
 
-
-
 def main():
     app = QtWidgets.QApplication(sys.argv)  # Новый экземпляр QApplication
     window = ExampleApp()  # Создаём объект класса ExampleApp
     window.show()  # Показываем окно
     app.exec_()  # и запускаем приложение
-
 
 
 if __name__ == '__main__':  # Если мы запускаем файл напрямую, а не импортируем
