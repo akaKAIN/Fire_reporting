@@ -36,6 +36,10 @@ STATUS = {
         "text": "Данные успешно сохранены",
         "color": "darkgreen"
         },
+    "is_empty": {
+        "text": "Форма пуста. Введите данные для сохранения их в файл.",
+        "color": "darkyellow"
+        },
 
 }
 
@@ -89,7 +93,7 @@ class ExampleApp(QtWidgets.QMainWindow):
 
     # Получение данных со всех полей ввода и приведение их к числам.
     # В случае корректности, поля очищаются.
-    def get_data_from_fields(self) -> list:
+    def get_data_from_fields(self) -> list or None:
         self.ui.label_error.setText("")
         data = []
         for field_name, field_type in self.ui.__dict__.items():
@@ -98,6 +102,11 @@ class ExampleApp(QtWidgets.QMainWindow):
                 data.append(self.give_me_int(field_text))
         if "error" in data:
             return None
+
+        # Проверка, на то, что пользватель ввел только нули (пустая форма)
+        elif not any(data):
+            self.show_status_text(STATUS['is_empty'])
+
         else:
             # TODO: передавать данные в Excel-file для сохранения
             self.clear_fields()
@@ -106,7 +115,7 @@ class ExampleApp(QtWidgets.QMainWindow):
 
     # Демонстрация текста ошибки в окне
     def show_error_text(self, error):
-        # Выводим текст об ошибке и меняем его цвет на красный.
+        # Выводим текст об ошибке и меняем его цвет
         self.ui.label_error.setText(error["text"])
         self.ui.label_error.adjustSize()
         self.ui.label_error.setStyleSheet(f'color: {error["color"]};')
