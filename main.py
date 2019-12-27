@@ -7,7 +7,7 @@ import json
 from PyQt5.QtWidgets import QComboBox
 
 
-DATA = []  # Загружается из json-файла при инициализации класса ExampleApp
+DATA = {}  # Загружается из json-файла при инициализации класса ExampleApp
 JSON_FILE = 'name_list.json'
 INPUT_FIELD_TYPE = QtWidgets.QLineEdit
 
@@ -32,7 +32,7 @@ STATUS = {
         },
     "excel_file_select": {
         "text": "Файл успешно выбран",
-        "color": "orange"
+        "color": "green"
         },
     "is_valid": {
         "text": "Данные успешно сохранены",
@@ -56,21 +56,31 @@ class ExampleApp(QtWidgets.QMainWindow):
         self.ui.pushButton.clicked.connect(self.print_fields)                 # Кнопка вывода в консоль имен полей
         self.ui.pushButton_2.clicked.connect(self.get_data_from_fields)       # Кнопка проверки данных (+save +clear)
         self.ui.pushButton_3.clicked.connect(self.clear_fields)
-        self.load_name_list(JSON_FILE)                                        # Инициализация выпадающего списка зон
+        self.load_name_list(JSON_FILE)                                        # Инициализация выпадающего списка районов
         self.clear_fields()
-#         self.ui.box_area_1.clicked.connect(self.clear_fields)
 
     # Загрузка данных о Пожарных частях в районах
     def load_name_list(self, file_name):
+        global DATA
         self.ui.box_area_1.addItem("-")           # Добавление первого (пустого) значения в выпадающий список
         if os.path.isfile(file_name):
             with open(file_name, 'r', encoding='utf-8') as f:
                 DATA = json.loads(f.read())
-            for area in DATA:
-                self.ui.box_area_1.addItems(area.keys())
+            self.ui.box_area_1.addItems(DATA.keys())
 
+            # Уставнока сигнала для поля выбора района
+            self.ui.box_area_1.currentIndexChanged.connect(self.get_point_list)
         else:
             self.show_error_text(ERRORS["no_name_list"])
+
+    # Сборка выпадающего списка исходя из того, какой выбран район.
+    def get_point_list(self):
+        self.ui.box_point_1.clear()
+        self.ui.box_point_1.addItem("-")
+        selected_area = self.ui.box_area_1.currentText()
+        for area, point_list in DATA.items():
+            if selected_area == area:
+                self.ui.box_point_1.addItems(point_list)
 
     # TODO: подключение Excel-файла для дальнейшей работы. Проверка файла валидность.
     def select_file(file_name):
