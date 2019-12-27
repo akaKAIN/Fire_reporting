@@ -100,7 +100,7 @@ class ExampleApp(QtWidgets.QMainWindow):
                 self.ui.box_point_1.addItems(point_list)
 
     # TODO: подключение Excel-файла для дальнейшей работы. Проверка файла валидность.
-    def select_file(file_name):
+    def select_file(self, file_name):
         pass
 
     # служебная функция для просмотра подключенных виджетов TODO: удалить после завершения
@@ -153,13 +153,13 @@ class ExampleApp(QtWidgets.QMainWindow):
         # Составление выпадающего списка файлов
         self.ui.box_file_1.addItems(files_list)
 
+        # Добавление сигнала в поле списка файлов. Через lambda реализована передача параметра с именем,
+        # которое выбирает пользователь с списке файлов в текущей директории
         self.ui.box_file_1.currentTextChanged.connect(
             lambda val=self.ui.box_file_1.currentText(): self.file.is_file_exist(val)
         )
 
         #TODO: вставить список листов из файла
-
-
 
     # Демонстрация текста ошибки в окне
     def show_error_text(self, error):
