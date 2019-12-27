@@ -4,6 +4,8 @@ from py_windows.design import Ui_MainWindow
 import os
 import json
 
+from PyQt5.QtWidgets import QComboBox
+
 
 DATA = []  # Загружается из json-файла при инициализации класса ExampleApp
 JSON_FILE = 'name_list.json'
@@ -38,7 +40,7 @@ STATUS = {
         },
     "is_empty": {
         "text": "Форма пуста. Введите данные для сохранения их в файл.",
-        "color": "darkyellow"
+        "color": "darkgoldenrod"
         },
 
 }
@@ -52,18 +54,21 @@ class ExampleApp(QtWidgets.QMainWindow):
         self.ui = Ui_MainWindow()
         self.ui.setupUi(self)  # Это нужно для инициализации нашего дизайна
         self.ui.pushButton.clicked.connect(self.print_fields)                 # Кнопка вывода в консоль имен полей
-        self.ui.pushButton_2.clicked.connect(self.get_data_from_fields)       # Кнопка проверки данных ( + очистка)
-        self.load_name_list(JSON_FILE)
+        self.ui.pushButton_2.clicked.connect(self.get_data_from_fields)       # Кнопка проверки данных (+save +clear)
+        self.ui.pushButton_3.clicked.connect(self.clear_fields)
+        self.load_name_list(JSON_FILE)                                        # Инициализация выпадающего списка зон
         self.clear_fields()
+#         self.ui.box_area_1.clicked.connect(self.clear_fields)
 
     # Загрузка данных о Пожарных частях в районах
     def load_name_list(self, file_name):
+        self.ui.box_area_1.addItem("-")           # Добавление первого (пустого) значения в выпадающий список
         if os.path.isfile(file_name):
             with open(file_name, 'r', encoding='utf-8') as f:
                 DATA = json.loads(f.read())
             for area in DATA:
-                for key in area.keys():
-                    self.ui.box_area_1.addItem(key)
+                self.ui.box_area_1.addItems(area.keys())
+
         else:
             self.show_error_text(ERRORS["no_name_list"])
 
@@ -78,6 +83,7 @@ class ExampleApp(QtWidgets.QMainWindow):
 
     # Очистка всех полей формы и заполенение их нулями.
     def clear_fields(self):
+        self.clear_message()
         for field_name, field_type in self.ui.__dict__.items():
             if isinstance(field_type, INPUT_FIELD_TYPE):
                 self.ui.__dict__[field_name].setText('0')
@@ -115,6 +121,8 @@ class ExampleApp(QtWidgets.QMainWindow):
 
     # Демонстрация текста ошибки в окне
     def show_error_text(self, error):
+        self.clear_message()
+
         # Выводим текст об ошибке и меняем его цвет
         self.ui.label_error.setText(error["text"])
         self.ui.label_error.adjustSize()
@@ -123,9 +131,15 @@ class ExampleApp(QtWidgets.QMainWindow):
     # TODO: так, в дальнейшем можно объеденить в одну функцию
     # через передачу доп.параметра в self.ui.__dict__["param"] ...
     def show_status_text(self, status):
+        self.clear_message()
+
         self.ui.label_status.setText(status["text"])
         self.ui.label_status.adjustSize()
         self.ui.label_status.setStyleSheet(f'color: {status["color"]};')
+
+    def clear_message(self):
+        self.ui.label_status.setText("")
+        self.ui.label_error.setText("")
 
 
 def main():
