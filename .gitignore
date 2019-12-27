@@ -130,6 +130,6 @@ dmypy.json
 .pyre/
 
 # Office
-.xls
-.xlsx
-.odt
+*.xls
+*.xlsx
+*.odt
