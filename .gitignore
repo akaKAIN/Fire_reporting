@@ -103,6 +103,7 @@ celerybeat.pid
 
 # Environments
 .env
+
 .venv
 env/
 venv/
@@ -127,3 +128,8 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
+
+# Office
+.xls
+.xlsx
+.odt
