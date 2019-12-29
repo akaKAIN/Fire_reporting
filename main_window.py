@@ -156,10 +156,20 @@ class ExampleApp(QtWidgets.QMainWindow):
         # Добавление сигнала в поле списка файлов. Через lambda реализована передача параметра с именем,
         # которое выбирает пользователь с списке файлов в текущей директории
         self.ui.box_file_1.currentTextChanged.connect(
-            lambda val=self.ui.box_file_1.currentText(): self.file.is_file_exist(val)
+            lambda val=self.get_select_element("box_file_1"): self.file.get_sheets_list(val)
         )
+        # TODO: вставить список листов из файла (пока не реализовано)
 
-        #TODO: вставить список листов из файла
+        self.ui.box_sheet_1.clear()
+        sheets_list, error = self.file.get_sheets_list(self.file.file_name)
+        self.ui.box_sheet_1.addItem("-")
+        if error:
+            self.show_error_text(error)
+        else:
+            self.ui.box_sheet_1.addItems(sheets_list)
+
+    def get_select_element(self, tag_name):
+        return self.ui.__dict__[tag_name].currentText()
 
     # Демонстрация текста ошибки в окне
     def show_error_text(self, error):

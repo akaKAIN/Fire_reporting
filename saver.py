@@ -1,4 +1,4 @@
-import xlsxwriter
+import openpyxl
 import os
 
 from main_window import ERRORS
@@ -23,13 +23,13 @@ class DocFile:
         return file_list
 
     # Проверка существования файла. Чтение списка листов в файле
-    def is_file_exist(self, file_name: str) -> (bool, str):
-        print(file_name)
+    def get_sheets_list(self, file_name: str) -> (list, str):
         if os.path.isfile(file_name):
             self.file_name = file_name
             # TODO: получение списка листов показанного документа и добавление списка в атрибут класса (self.all_sheets)
-            return True, ""
-        return False, ERRORS['no_file']
+            wb = openpyxl.load_workbook(file_name)
+            return wb.sheetnames, ""
+        return list(), ERRORS['no_file']
 
     def is_sheet_exist(self, sheet_name):
         if sheet_name in self.sheets_list:
@@ -43,13 +43,13 @@ class DocFile:
 def test(file_name):
 
     print(os.path.isfile(file_name))
-    f = xlsxwriter.Workbook(file_name)
-    new_sheet = f.add_chartsheet("test_create_sheet_60")
+    wb = openpyxl.load_workbook(file_name)
+    sheets = wb.sheetnames
+    print(sheets)
 
 
 if __name__ == "__main__":
     print(os.getcwd())
-    test('2020.odt')
-    test('2019.xls')
-    test('2018.xls')
+    test('table.xlsx')
+
 
