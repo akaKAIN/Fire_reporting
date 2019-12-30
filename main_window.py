@@ -102,9 +102,6 @@ class ExampleApp(QtWidgets.QMainWindow):
             if selected_area == area:
                 self.ui.box_point_1.addItems(point_list)
 
-    # TODO: подключение Excel-файла для дальнейшей работы. Проверка файла валидность.
-    def select_file(self, file_name):
-        pass
 
     # служебная функция для просмотра подключенных виджетов TODO: удалить после завершения
     def print_fields(self):
@@ -144,6 +141,7 @@ class ExampleApp(QtWidgets.QMainWindow):
 
         else:
             # TODO: передавать данные в Excel-file для сохранения
+            self.save_input_data(data)
             self.clear_fields()
             self.show_status_text(STATUS['is_valid'])
             print(data)
@@ -173,6 +171,18 @@ class ExampleApp(QtWidgets.QMainWindow):
         else:
             sheets_list.sort(reverse=True)
             self.ui.box_sheet_1.addItems(sheets_list)
+            self.ui.box_sheet_1.currentTextChanged.connect(
+                lambda val=self.get_select_element("box_sheet_1"): self.file.get_active_sheet(val)
+            )
+            print(f'{self.file.active_sheet=}\n'
+                  f'{self.file.sheets_list=}\n')
+
+    def save_input_data(self, input_list: list):
+        data_key = self.ui.box_point_1.currentText()
+        data = {
+            data_key: input_list
+        }
+        self.file.save_in_file(data=data)
 
     def get_select_element(self, tag_name):
         return self.ui.__dict__[tag_name].currentText()
