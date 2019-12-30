@@ -7,8 +7,8 @@ from main_window import ERRORS
 class DocFile:
     def __init__(self):
         self.files_list = self.get_files_list()
-        self.file_name = ""
-        self.sheet_name: ""
+        self.file_name = None
+        self.active_sheet = None
         self.sheets_list = list()
 
     # Получение списка табличных файлов в текущей директории
@@ -26,15 +26,10 @@ class DocFile:
     def get_sheets_list(self, file_name: str) -> (list, str):
         if os.path.isfile(file_name):
             self.file_name = file_name
-            # TODO: получение списка листов показанного документа и добавление списка в атрибут класса (self.all_sheets)
             wb = openpyxl.load_workbook(file_name)
-            return wb.sheetnames, ""
+            self.sheets_list = wb.sheetnames
+            return self.sheets_list, ""
         return list(), ERRORS['no_file']
-
-    def is_sheet_exist(self, sheet_name):
-        if sheet_name in self.sheets_list:
-            # TODO: проверка существования листов
-            pass
 
     def get_cell_row(self, text_in_cell):
         pass
