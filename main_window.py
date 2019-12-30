@@ -5,7 +5,6 @@ import saver
 import json
 import os
 
-
 from PyQt5.QtWidgets import QComboBox
 
 DATA = {}  # Загружается из json-файла при инициализации класса ExampleApp
@@ -24,6 +23,10 @@ ERRORS = {
     },
     "no_file": {
         "text": "Не найден Excel-файл.",
+        "color": "red"
+    },
+    "no_sheets": {
+        "text": "В файле нет вкладок",
         "color": "red"
     },
 }
@@ -156,16 +159,19 @@ class ExampleApp(QtWidgets.QMainWindow):
         # Добавление сигнала в поле списка файлов. Через lambda реализована передача параметра с именем,
         # которое выбирает пользователь с списке файлов в текущей директории
         self.ui.box_file_1.currentTextChanged.connect(
-            lambda val=self.get_select_element("box_file_1"): self.file.get_sheets_list(val)
+            lambda val=self.get_select_element("box_file_1"): self.load_sheets_list(val)
         )
-        # TODO: вставить список листов из файла (пока не реализовано)
 
+    def load_sheets_list(self, file_name: str):
         self.ui.box_sheet_1.clear()
-        sheets_list, error = self.file.get_sheets_list(self.file.file_name)
-        self.ui.box_sheet_1.addItem("-")
+        sheets_list, error = self.file.get_sheets_list(file_name)
+        self.ui.box_sheet_1.addItem("-")  # Закоммитить эту строчку. чтобы последняя вкладка выбиралась автоматически.
         if error:
             self.show_error_text(error)
+        elif len(sheets_list) == 0:
+            self.show_error_text(ERRORS['no_sheets'])
         else:
+            sheets_list.sort(reverse=True)
             self.ui.box_sheet_1.addItems(sheets_list)
 
     def get_select_element(self, tag_name):
