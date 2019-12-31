@@ -40,14 +40,29 @@ class DocFile:
             self.work_sheet = self.workbook[self.active_sheet]
 
     def save_in_file(self, data: dict):
-        cell = self.get_start_cell(*data.keys())
-        _, data = data.items()
-        for i in range(len(data)):
-            cell.column += 1
-            cell.value = data[i]
-            cell.column += 1
-            cell.value += data[i]
-        self.workbook.save()
+        key = self.get_data_key(data=data)
+        val = data[key]
+        cell = self.get_start_cell(key)
+        # print(f'{data=}\n{key=}\n{cell=}\n{val=}')
+        next_column_num = cell.column + 1
+        for i in range(len(val)-1):
+            # Сохраняем данные "за сутки"
+            next_cell = self.work_sheet.cell(row=cell.row, column=next_column_num)
+            next_cell.value = val[i]
+            next_column_num += 1
+
+            # сохраняем данные "за сутки" агрегируя их с имеющимся значением
+            next_cell = self.work_sheet.cell(row=cell.row, column=next_column_num)
+
+            # print(f'{next_cell.value=}\t{type(next_cell.value)=}')
+            next_cell.value += val[i]
+            next_column_num += 1
+        self.workbook.save(self.file_name)
+
+    @staticmethod
+    def get_data_key(data):
+        for key in data.keys():
+            return key
 
     def get_start_cell(self, value_in_cell: str):
         if self.work_sheet:
