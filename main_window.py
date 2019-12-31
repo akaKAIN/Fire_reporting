@@ -140,11 +140,10 @@ class ExampleApp(QtWidgets.QMainWindow):
             self.show_status_text(STATUS['is_empty'])
 
         else:
-            # TODO: передавать данные в Excel-file для сохранения
             self.save_input_data(data)
             self.clear_fields()
             self.show_status_text(STATUS['is_valid'])
-            print(data)
+            # print(data)
 
     # Функция нициализации выпадающего списка файлов и связывание с выпадающим списком листов в документе
     def load_files_list(self):
