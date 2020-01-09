@@ -13,7 +13,6 @@ class DocFile:
         self.workbook = None
         self.sheets_list = list()
 
-
     # Получение списка табличных файлов в текущей директории
     @staticmethod
     def get_files_list():
@@ -43,7 +42,13 @@ class DocFile:
         key = self.get_data_key(data=data)
         val = data[key]
         cell = self.get_start_cell(key)
+
         # print(f'{data=}\n{key=}\n{cell=}\n{val=}')
+        # Проверка существования выбраного пользователем имени подразделения в ячейке файла, куда сохраняем инфу.
+        if getattr(cell, 'column', None) is None:
+            print("не найдена ячейка с именем")
+            return False, ERRORS["no_point"]
+
         next_column_num = cell.column + 1
         for i in range(len(val)-1):
             # Сохраняем данные "за сутки"
@@ -51,13 +56,18 @@ class DocFile:
             next_cell.value = val[i]
             next_column_num += 1
 
-            # сохраняем данные "за сутки" агрегируя их с имеющимся значением
+            # сохраняем данные "за период", агрегируя "за сутки" с имеющимся значением "за период".
             next_cell = self.work_sheet.cell(row=cell.row, column=next_column_num)
 
             # print(f'{next_cell.value=}\t{type(next_cell.value)=}')
-            next_cell.value += val[i]
+            if next_cell.value is None:
+                next_cell.value = val[i]
+            else:
+                next_cell.value += val[i]
+
             next_column_num += 1
         self.workbook.save(self.file_name)
+        return True, ""
 
     @staticmethod
     def get_data_key(data):

@@ -29,6 +29,11 @@ ERRORS = {
         "text": "В файле нет вкладок",
         "color": "red"
     },
+    "no_point": {
+        "text": "В файле отсутствует ячейка с выбранным названием подразделения\n"
+                "(Добавьте или исправьте данные конфигурационного файла)",
+        "color": "red"
+    }
 }
 
 STATUS = {
@@ -102,7 +107,6 @@ class ExampleApp(QtWidgets.QMainWindow):
             if selected_area == area:
                 self.ui.box_point_1.addItems(point_list)
 
-
     # служебная функция для просмотра подключенных виджетов TODO: удалить после завершения
     def print_fields(self):
         for elem in self.ui.__dict__.items():
@@ -140,9 +144,13 @@ class ExampleApp(QtWidgets.QMainWindow):
             self.show_status_text(STATUS['is_empty'])
 
         else:
-            self.save_input_data(data)
-            self.clear_fields()
-            self.show_status_text(STATUS['is_valid'])
+            err = self.save_input_data(data)
+            if err is None:
+                self.clear_fields()
+                self.show_status_text(STATUS['is_valid'])
+            else:
+                self.show_error_text(error=err)
+
             # print(data)
 
     # Функция нициализации выпадающего списка файлов и связывание с выпадающим списком листов в документе
@@ -181,7 +189,9 @@ class ExampleApp(QtWidgets.QMainWindow):
         data = {
             data_key: input_list
         }
-        self.file.save_in_file(data=data)
+        ok, err = self.file.save_in_file(data=data)
+        if not ok:
+            return err
 
     def get_select_element(self, tag_name):
         return self.ui.__dict__[tag_name].currentText()
