@@ -1,7 +1,6 @@
 import openpyxl
 import os
-
-from main_window import ERRORS
+from messages.errors import ERRORS
 
 
 class DocFile:
@@ -67,6 +66,7 @@ class DocFile:
                 next_cell.value += val[i]
 
             next_column_num += 1
+        # TODO: удалять из заданной области название заполненной части (остаются только "незаполненные")
         self.workbook.save(self.file_name)
         return True, ""
 

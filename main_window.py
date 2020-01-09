@@ -1,14 +1,15 @@
-import sys  # sys нужен для передачи argv в QApplication
-from PyQt5 import QtWidgets
-from py_windows.design import Ui_MainWindow
-from messages.errors import ERRORS
-from messages.status import STATUS
-import saver
 import json
 import os
+import sys  # sys нужен для передачи argv в QApplication
 
+from PyQt5 import QtWidgets
+from PyQt5.QtCore import QStringListModel
+from PyQt5.QtWidgets import QListView
 
-from PyQt5.QtWidgets import QComboBox
+import saver
+from messages.errors import ERRORS
+from messages.status import STATUS
+from py_windows.design import Ui_MainWindow
 
 DATA = {}  # Загружается из json-файла при инициализации класса ExampleApp
 JSON_FILE = 'name_list.json'
@@ -58,6 +59,17 @@ class ExampleApp(QtWidgets.QMainWindow):
             if not self.file.points_list:
                 for values in DATA.values():
                     self.file.points_list.extend(values)
+
+            # Заполенение текстового поля всеми имеющимися названиями Пожарных частей
+            # TODO: сделать проверку и выборку и вывод в текстовое поле только тех пожарных частей,
+            #  даннные по которым "незаполнены".
+
+            # TODO: реализовать чтение заданной области из Excel-файла названий частей, которые "незаполнены".
+
+            # TODO*: добавить изменение цвета в текстовом поле вывода "незаполенных" частей (рекомендуется)
+
+            model = QStringListModel(self.file.points_list)
+            self.ui.listView.setModel(model)
         else:
             self.show_error_text(ERRORS["no_name_list"])
 
