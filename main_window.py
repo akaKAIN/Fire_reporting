@@ -1,60 +1,18 @@
 import sys  # sys нужен для передачи argv в QApplication
 from PyQt5 import QtWidgets
 from py_windows.design import Ui_MainWindow
+from messages.errors import ERRORS
+from messages.status import STATUS
 import saver
 import json
 import os
+
 
 from PyQt5.QtWidgets import QComboBox
 
 DATA = {}  # Загружается из json-файла при инициализации класса ExampleApp
 JSON_FILE = 'name_list.json'
 INPUT_FIELD_TYPE = QtWidgets.QLineEdit
-
-ERRORS = {
-    "not_number": {
-        "text": "Ошибка ввода данных - буквы в числовом поле",
-        "color": "red"
-    },
-
-    "no_name_list": {
-        "text": "Не найден файл со списками Почарных Частей",
-        "color": "red"
-    },
-    "no_file": {
-        "text": "Не найден Excel-файл.",
-        "color": "red"
-    },
-    "no_sheets": {
-        "text": "В файле нет вкладок",
-        "color": "red"
-    },
-    "no_point": {
-        "text": "В файле отсутствует ячейка с выбранным названием подразделения\n"
-                "(Добавьте или исправьте данные конфигурационного файла)",
-        "color": "red"
-    }
-}
-
-STATUS = {
-    "no_excel_file": {
-        "text": "Выберете файл для начала работы",
-        "color": "orange"
-    },
-    "excel_file_select": {
-        "text": "Файл успешно выбран",
-        "color": "green"
-    },
-    "is_valid": {
-        "text": "Данные успешно сохранены",
-        "color": "darkgreen"
-    },
-    "is_empty": {
-        "text": "Форма пуста. Введите данные для сохранения их в файл.",
-        "color": "darkgoldenrod"
-    },
-
-}
 
 
 class ExampleApp(QtWidgets.QMainWindow):
@@ -95,6 +53,11 @@ class ExampleApp(QtWidgets.QMainWindow):
 
             # Уставнока сигнала для поля выбора района
             self.ui.box_area_1.currentIndexChanged.connect(self.get_point_list)
+
+            # Сохранение списка всех имеющихся Пожарных частей (points) в атрибуте
+            if not self.file.points_list:
+                for values in DATA.values():
+                    self.file.points_list.extend(values)
         else:
             self.show_error_text(ERRORS["no_name_list"])
 

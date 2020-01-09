@@ -12,6 +12,7 @@ class DocFile:
         self.work_sheet = None
         self.workbook = None
         self.sheets_list = list()
+        self.points_list = list()
 
     # Получение списка табличных файлов в текущей директории
     @staticmethod
