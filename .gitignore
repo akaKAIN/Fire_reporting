@@ -132,4 +132,6 @@ dmypy.json
 # Office
 *.xls
 *.xlsx
+*.xlsx#
+*.xls#
 *.odt
