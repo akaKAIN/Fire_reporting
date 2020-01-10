@@ -1,7 +1,6 @@
 import openpyxl
 import os
-
-from main_window import ERRORS
+from messages.errors import ERRORS
 
 
 class DocFile:
@@ -12,6 +11,7 @@ class DocFile:
         self.work_sheet = None
         self.workbook = None
         self.sheets_list = list()
+        self.points_list = list()
 
     # Получение списка табличных файлов в текущей директории
     @staticmethod
@@ -38,41 +38,40 @@ class DocFile:
             self.active_sheet = selected_sheet_name
             self.work_sheet = self.workbook[self.active_sheet]
 
-    def save_in_file(self, data: dict):
-        key = self.get_data_key(data=data)
-        val = data[key]
+    def save_in_file(self, key, data):
         cell = self.get_start_cell(key)
 
-        # print(f'{data=}\n{key=}\n{cell=}\n{val=}')
+        print(f'{key=}\n{cell=}\n{data=}')
         # Проверка существования выбраного пользователем имени подразделения в ячейке файла, куда сохраняем инфу.
         if getattr(cell, 'column', None) is None:
             print("не найдена ячейка с именем")
             return False, ERRORS["no_point"]
 
-        next_column_num = cell.column + 1
-        for i in range(len(val)-1):
+        next_column_num = cell.column
+        for i in range(len(data)-1):
             # Сохраняем данные "за сутки"
-            next_cell = self.work_sheet.cell(row=cell.row, column=next_column_num)
-            next_cell.value = val[i]
             next_column_num += 1
+            next_cell = self.work_sheet.cell(row=cell.row, column=next_column_num)
+            next_cell.value = data[i]
 
-            # сохраняем данные "за период", агрегируя "за сутки" с имеющимся значением "за период".
+            # Сохраняем данные "за период", агрегируя "за сутки" с имеющимся значением "за период".
+            next_column_num += 1
             next_cell = self.work_sheet.cell(row=cell.row, column=next_column_num)
 
             # print(f'{next_cell.value=}\t{type(next_cell.value)=}')
             if next_cell.value is None:
-                next_cell.value = val[i]
+                next_cell.value = data[i]
             else:
-                next_cell.value += val[i]
+                next_cell.value += data[i]
 
-            next_column_num += 1
+        # Данные последней ячейки не агрегируются
+        next_column_num += 1
+        next_cell = self.work_sheet.cell(row=cell.row, column=next_column_num)
+        next_cell.value = data[-1]
+
+        # TODO: удалять из заданной области название заполненной части (остаются только "незаполненные")
         self.workbook.save(self.file_name)
         return True, ""
-
-    @staticmethod
-    def get_data_key(data):
-        for key in data.keys():
-            return key
 
     def get_start_cell(self, value_in_cell: str):
         if self.work_sheet:

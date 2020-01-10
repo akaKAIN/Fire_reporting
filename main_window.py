@@ -1,60 +1,18 @@
-import sys  # sys нужен для передачи argv в QApplication
-from PyQt5 import QtWidgets
-from py_windows.design import Ui_MainWindow
-import saver
 import json
 import os
+import sys  # sys нужен для передачи argv в QApplication
 
-from PyQt5.QtWidgets import QComboBox
+from PyQt5 import QtWidgets
+from PyQt5.QtCore import QStringListModel
+
+import saver
+from messages.errors import ERRORS
+from messages.status import STATUS
+from py_windows.design import Ui_MainWindow
 
 DATA = {}  # Загружается из json-файла при инициализации класса ExampleApp
 JSON_FILE = 'name_list.json'
 INPUT_FIELD_TYPE = QtWidgets.QLineEdit
-
-ERRORS = {
-    "not_number": {
-        "text": "Ошибка ввода данных - буквы в числовом поле",
-        "color": "red"
-    },
-
-    "no_name_list": {
-        "text": "Не найден файл со списками Почарных Частей",
-        "color": "red"
-    },
-    "no_file": {
-        "text": "Не найден Excel-файл.",
-        "color": "red"
-    },
-    "no_sheets": {
-        "text": "В файле нет вкладок",
-        "color": "red"
-    },
-    "no_point": {
-        "text": "В файле отсутствует ячейка с выбранным названием подразделения\n"
-                "(Добавьте или исправьте данные конфигурационного файла)",
-        "color": "red"
-    }
-}
-
-STATUS = {
-    "no_excel_file": {
-        "text": "Выберете файл для начала работы",
-        "color": "orange"
-    },
-    "excel_file_select": {
-        "text": "Файл успешно выбран",
-        "color": "green"
-    },
-    "is_valid": {
-        "text": "Данные успешно сохранены",
-        "color": "darkgreen"
-    },
-    "is_empty": {
-        "text": "Форма пуста. Введите данные для сохранения их в файл.",
-        "color": "darkgoldenrod"
-    },
-
-}
 
 
 class ExampleApp(QtWidgets.QMainWindow):
@@ -95,6 +53,23 @@ class ExampleApp(QtWidgets.QMainWindow):
 
             # Уставнока сигнала для поля выбора района
             self.ui.box_area_1.currentIndexChanged.connect(self.get_point_list)
+
+            # Сохранение списка всех имеющихся Пожарных частей (points) в атрибуте
+            if not self.file.points_list:
+                for values in DATA.values():
+                    self.file.points_list.extend(values)
+
+            # Заполенение текстового поля всеми имеющимися названиями Пожарных частей
+            # TODO: сделать проверку и выборку и вывод в текстовое поле только тех пожарных частей,
+            #  даннные по которым "незаполнены".
+
+            # TODO: реализовать чтение заданной области из Excel-файла названий частей, которые "незаполнены".
+
+            # TODO*: добавить изменение цвета в текстовом поле вывода "незаполенных" частей (рекомендуется)
+
+            model = QStringListModel(self.file.points_list)
+
+            self.ui.listView.setModel(model)
         else:
             self.show_error_text(ERRORS["no_name_list"])
 
@@ -176,8 +151,11 @@ class ExampleApp(QtWidgets.QMainWindow):
         elif len(sheets_list) == 0:
             self.show_error_text(ERRORS['no_sheets'])
         else:
-            sheets_list.sort(reverse=True)
+            sheets_list.sort(reverse=True)     # Сортировка листов документа в обратном порядке.
             self.ui.box_sheet_1.addItems(sheets_list)
+
+            # Добавление сигнала в поле списка файлов. Через lambda реализована передача параметра с именем,
+            # которое выбирает пользователь с списке листов в текущем файле.
             self.ui.box_sheet_1.currentTextChanged.connect(
                 lambda val=self.get_select_element("box_sheet_1"): self.file.get_active_sheet(val)
             )
@@ -185,11 +163,8 @@ class ExampleApp(QtWidgets.QMainWindow):
                   f'{self.file.sheets_list=}\n')
 
     def save_input_data(self, input_list: list):
-        data_key = self.ui.box_point_1.currentText()
-        data = {
-            data_key: input_list
-        }
-        ok, err = self.file.save_in_file(data=data)
+        data_key: str = self.ui.box_point_1.currentText()
+        ok, err = self.file.save_in_file(key=data_key, data=input_list)
         if not ok:
             return err
 
