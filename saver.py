@@ -39,35 +39,38 @@ class DocFile:
             self.work_sheet = self.workbook[self.active_sheet]
 
     def save_in_file(self, key, data):
+
+        def addition_values(obj, value, row, column, aggregate=True):
+            """Функция переноса данных в ячейки и агрегации переданных значений в Excel-файл"""
+
+            # Сохраняем данные "за сутки"
+            active_cell = obj.work_sheet.cell(row=row, column=column)
+            active_cell.value = value
+            if aggregate:
+                # Сохраняем данные "за период", агрегируя "за сутки" с имеющимся значением "за период".
+                active_cell = obj.work_sheet.cell(row=row, column=column + 1)
+
+                # print(f'{next_cell.value=}\t{type(next_cell.value)=}')
+                if active_cell.value is None:
+                    active_cell.value = value
+                else:
+                    active_cell.value += value
+            return
+
         cell = self.get_start_cell(key)
 
-        print(f'{key=}\n{cell=}\n{data=}')
+        # print(f'{key=}\n{cell=}\n{data=}')
         # Проверка существования выбраного пользователем имени подразделения в ячейке файла, куда сохраняем инфу.
         if getattr(cell, 'column', None) is None:
             print("не найдена ячейка с именем")
             return False, ERRORS["no_point"]
 
-        next_column_num = cell.column
-        for i in range(len(data)-1):
+        for i in range(len(data) - 1):  # Последнее значение списка будет добавлено отдельно.
             # Сохраняем данные "за сутки"
-            next_column_num += 1
-            next_cell = self.work_sheet.cell(row=cell.row, column=next_column_num)
-            next_cell.value = data[i]
+            addition_values(self, value=data[i], row=cell.row, column=cell.column + 1 + (i * 2))
 
-            # Сохраняем данные "за период", агрегируя "за сутки" с имеющимся значением "за период".
-            next_column_num += 1
-            next_cell = self.work_sheet.cell(row=cell.row, column=next_column_num)
-
-            # print(f'{next_cell.value=}\t{type(next_cell.value)=}')
-            if next_cell.value is None:
-                next_cell.value = data[i]
-            else:
-                next_cell.value += data[i]
-
-        # Данные последней ячейки не агрегируются
-        next_column_num += 1
-        next_cell = self.work_sheet.cell(row=cell.row, column=next_column_num)
-        next_cell.value = data[-1]
+        # Добавление значения последней ячейки без последующей агрегации.
+        addition_values(self, value=data[-1], row=cell.row, column=cell.column + len(data) * 2 - 1, aggregate=False)
 
         # TODO: удалять из заданной области название заполненной части (остаются только "незаполненные")
         self.workbook.save(self.file_name)
@@ -90,5 +93,3 @@ def test(file_name):
 if __name__ == "__main__":
     print(os.getcwd())
     test('table.xlsx')
-
-
