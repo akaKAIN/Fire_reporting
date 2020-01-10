@@ -4,7 +4,6 @@ import sys  # sys нужен для передачи argv в QApplication
 
 from PyQt5 import QtWidgets
 from PyQt5.QtCore import QStringListModel
-from PyQt5.QtWidgets import QListView
 
 import saver
 from messages.errors import ERRORS
@@ -69,6 +68,7 @@ class ExampleApp(QtWidgets.QMainWindow):
             # TODO*: добавить изменение цвета в текстовом поле вывода "незаполенных" частей (рекомендуется)
 
             model = QStringListModel(self.file.points_list)
+
             self.ui.listView.setModel(model)
         else:
             self.show_error_text(ERRORS["no_name_list"])
@@ -151,8 +151,11 @@ class ExampleApp(QtWidgets.QMainWindow):
         elif len(sheets_list) == 0:
             self.show_error_text(ERRORS['no_sheets'])
         else:
-            sheets_list.sort(reverse=True)
+            sheets_list.sort(reverse=True)     # Сортировка листов документа в обратном порядке.
             self.ui.box_sheet_1.addItems(sheets_list)
+
+            # Добавление сигнала в поле списка файлов. Через lambda реализована передача параметра с именем,
+            # которое выбирает пользователь с списке листов в текущем файле.
             self.ui.box_sheet_1.currentTextChanged.connect(
                 lambda val=self.get_select_element("box_sheet_1"): self.file.get_active_sheet(val)
             )
@@ -160,11 +163,8 @@ class ExampleApp(QtWidgets.QMainWindow):
                   f'{self.file.sheets_list=}\n')
 
     def save_input_data(self, input_list: list):
-        data_key = self.ui.box_point_1.currentText()
-        data = {
-            data_key: input_list
-        }
-        ok, err = self.file.save_in_file(data=data)
+        data_key: str = self.ui.box_point_1.currentText()
+        ok, err = self.file.save_in_file(key=data_key, data=input_list)
         if not ok:
             return err
 
